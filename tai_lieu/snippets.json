@@ -1,0 +1,70 @@
+{
+  "list_pdfs": {
+    "file": "src/pdf_reader.py",
+    "code": "def list_pdfs(folder: Path) -> list[Path]:\n    \"\"\"Input: thu muc. Output: danh sach tep PDF, sap xep theo ten.\"\"\"\n    return sorted(\n        (p for p in folder.iterdir() if p.is_file() and p.suffix.lower() == '.pdf'),\n        key=lambda p: p.name.lower(),\n    ) if folder.exists() else []"
+  },
+  "load_pdfs": {
+    "file": "src/pdf_reader.py",
+    "code": "def load_pdfs(folder: Path) -> list[Document]:\n    \"\"\"Input: thu muc chua PDF. Output: trang co van ban duoi dang Document.\"\"\"\n    pdfs = list_pdfs(folder)\n    if not pdfs:\n        raise FileNotFoundError(f'Chua co file PDF trong: {folder}')\n\n    documents: list[Document] = []\n    for pdf in pdfs:\n        try:\n            pages = PyPDFLoader(str(pdf)).load()\n        except Exception as exc:\n            raise RuntimeError(f'Khong doc duoc PDF {pdf.name}: {exc}') from exc\n        for page in pages:\n            if page.page_content and page.page_content.strip():\n                # 'page' tu PyPDFLoader bat dau bang 0 (trang thu 1 -> 0).\n                page.metadata['source'] = pdf.name\n                documents.append(page)\n    if not documents:\n        raise ValueError('PDF khong trich xuat duoc chu. Neu la ban scan anh, can OCR.')\n    return documents"
+  },
+  "split_documents": {
+    "file": "src/text_chunker.py",
+    "code": "def split_documents(\n    documents: list[Document], chunk_size: int = 900, chunk_overlap: int = 150\n) -> list[Document]:\n    \"\"\"Input: documents + do dai/overlap. Output: danh sach chunk Document.\"\"\"\n    if chunk_size <= 0:\n        raise ValueError('chunk_size phai lon hon 0')\n    if not (0 <= chunk_overlap < chunk_size):\n        raise ValueError('chunk_overlap phai tu 0 den nho hon chunk_size')\n    splitter = RecursiveCharacterTextSplitter(\n        chunk_size=chunk_size,\n        chunk_overlap=chunk_overlap,\n        separators=['\\n\\n', '\\n', '. ', ' ', ''],\n    )\n    chunks = splitter.split_documents(documents)\n    for idx, doc in enumerate(chunks, start=1):\n        doc.metadata['chunk_id'] = idx\n    return chunks"
+  },
+  "make_embeddings": {
+    "file": "src/vector_store.py",
+    "code": "def make_embeddings(model_name: str) -> HuggingFaceEmbeddings:\n    \"\"\"Input: ten model HuggingFace. Output: bo ma hoa van ban thanh vector.\"\"\"\n    return HuggingFaceEmbeddings(model_name=model_name)"
+  },
+  "build_vector_store": {
+    "file": "src/vector_store.py",
+    "code": "def build_vector_store(documents: list[Document], embeddings: HuggingFaceEmbeddings) -> FAISS:\n    \"\"\"Input: chunks + embedding. Output: FAISS vector store trong RAM.\"\"\"\n    if not documents:\n        raise ValueError('Khong co doan van ban de tao FAISS.')\n    return FAISS.from_documents(documents, embeddings)"
+  },
+  "save_vector_store": {
+    "file": "src/vector_store.py",
+    "code": "def save_vector_store(store: FAISS, folder: Path) -> None:\n    \"\"\"Input: FAISS + thu muc. Output: tep index.faiss va index.pkl tren o dia.\"\"\"\n    folder.mkdir(parents=True, exist_ok=True)\n    store.save_local(str(folder))"
+  },
+  "load_vector_store": {
+    "file": "src/vector_store.py",
+    "code": "def load_vector_store(folder: Path, embeddings: HuggingFaceEmbeddings) -> FAISS:\n    \"\"\"Input: index da tao + embedding. Output: FAISS vector store de tim kiem.\n\n    CANH BAO: index.pkl dung pickle; chi tai lai index tin cay do ban tao.\n    Khong copy index.pkl tu nguon la vao folder nay.\n    \"\"\"\n    if not (folder / 'index.faiss').exists() or not (folder / 'index.pkl').exists():\n        raise FileNotFoundError('Chua tao index FAISS')\n    return FAISS.load_local(str(folder), embeddings, allow_dangerous_deserialization=True)"
+  },
+  "retrieve_documents": {
+    "file": "src/qa.py",
+    "code": "def retrieve_documents(store, question: str, k: int = 4) -> list[Document]:\n    \"\"\"Input: FAISS + cau hoi + top_k. Output: toi da k doan lien quan.\"\"\"\n    if not question.strip():\n        return []\n    return store.as_retriever(search_kwargs={'k': k}).invoke(question)"
+  },
+  "format_context": {
+    "file": "src/qa.py",
+    "code": "def format_context(documents: list[Document]) -> str:\n    \"\"\"Input: cac chunk tim duoc. Output: chuoi ngu canh co [i], ten tep, trang.\"\"\"\n    parts: list[str] = []\n    for idx, doc in enumerate(documents, start=1):\n        page_num = int(doc.metadata.get('page', 0)) + 1\n        filename = doc.metadata.get('source', 'khong-ro.pdf')\n        parts.append(f'[{idx}] File: {filename}; Trang: {page_num}\\n{doc.page_content}')\n    return '\\n\\n'.join(parts)"
+  },
+  "generate_answer": {
+    "file": "src/qa.py",
+    "code": "def generate_answer(question: str, documents: list[Document], model_name: str) -> str:\n    \"\"\"Input: cau hoi, chunk truy xuat, model Ollama. Output: cau tra loi String.\"\"\"\n    if not documents:\n        return 'Toi khong tim thay thong tin nay trong PDF.'\n    llm = ChatOllama(model=model_name, temperature=0)\n    chain = PROMPT | llm | StrOutputParser()\n    return chain.invoke({'question': question, 'context': format_context(documents)}).strip()"
+  },
+  "answer_question": {
+    "file": "src/qa.py",
+    "code": "def answer_question(store, question: str, model_name: str, k: int = 4) -> dict:\n    \"\"\"Input: FAISS, cau hoi, model, k. Output: dict(answer, sources, retrieved_count).\"\"\"\n    docs = retrieve_documents(store, question, k=k)\n    answer = generate_answer(question, docs, model_name)\n    sources = [\n        {'file': doc.metadata.get('source', '?'),\n         'page': int(doc.metadata.get('page', 0)) + 1,\n         'chunk_id': doc.metadata.get('chunk_id')}\n        for doc in docs\n    ]\n    return {'answer': answer, 'sources': sources, 'retrieved_count': len(docs)}"
+  },
+  "pdf_signature": {
+    "file": "src/pipeline.py",
+    "code": "def pdf_signature(pdf_dir: Path = PDF_DIR) -> list[dict]:\n    \"\"\"Input: thu muc PDF. Output: thong tin file de nhan biet thay doi.\"\"\"\n    return [\n        {'name': p.name, 'size': p.stat().st_size, 'mtime_ns': p.stat().st_mtime_ns}\n        for p in list_pdfs(pdf_dir)\n    ]"
+  },
+  "build_manifest": {
+    "file": "src/pipeline.py",
+    "code": "def build_manifest(pdf_dir: Path = PDF_DIR) -> dict:\n    \"\"\"Input: thu muc PDF. Output: metadata cua index va tham so.\"\"\"\n    return {\n        'pdfs': pdf_signature(pdf_dir),\n        'chunk_size': CHUNK_SIZE,\n        'chunk_overlap': CHUNK_OVERLAP,\n        'embedding_model': EMBEDDING_MODEL,\n    }"
+  },
+  "prepare_store": {
+    "file": "src/pipeline.py",
+    "code": "def prepare_store(pdf_dir: Path = PDF_DIR, index_dir: Path = INDEX_DIR):\n    \"\"\"Input: thu muc PDF/index. Output: tuple(FAISS, created_new, num_pages, num_chunks).\"\"\"\n    current = build_manifest(pdf_dir)\n    if not current['pdfs']:\n        raise FileNotFoundError(f'Chua co PDF trong thu muc: {pdf_dir}')\n    manifest_path = index_dir / 'manifest.json'\n    is_cached = False\n    if manifest_path.exists():\n        try:\n            is_cached = (json.loads(manifest_path.read_text(encoding='utf-8')) == current\n                         and (index_dir / 'index.faiss').exists()\n                         and (index_dir / 'index.pkl').exists())\n        except (OSError, ValueError):\n            pass\n    embeddings = make_embeddings(EMBEDDING_MODEL)\n    if is_cached:\n        print('[INFO] PDF khong doi - su dung index FAISS da luu.')\n        try:\n            return load_vector_store(index_dir, embeddings), False, None, None\n        except Exception as exc:\n            print(f'[WARN] Index cu khong doc duoc ({exc}). Dang tao moi...')\n    pages = load_pdfs(pdf_dir)\n    chunks = split_documents(pages, CHUNK_SIZE, CHUNK_OVERLAP)\n    print(f'[INFO] Da doc {len(pages)} trang co chu, tao {len(chunks)} chunks.')\n    store = build_vector_store(chunks, embeddings)\n    save_vector_store(store, index_dir)\n    manifest_path.write_text(json.dumps(current, ensure_ascii=False, indent=2), encoding='utf-8')\n    return store, True, len(pages), len(chunks)"
+  },
+  "check_ollama": {
+    "file": "app.py",
+    "code": "def check_ollama(model_name: str = LLM_MODEL) -> None:\n    \"\"\"Input: model name. Output: None; raise RuntimeError neu Ollama chua san sang.\"\"\"\n    try:\n        with urllib.request.urlopen(f'{OLLAMA_URL}/api/tags', timeout=4) as response:\n            info = json.load(response)\n    except (urllib.error.URLError, TimeoutError, ValueError) as exc:\n        raise RuntimeError(\n            'Khong ket noi duoc Ollama. Hay mo ung dung Ollama tren Windows; '\n            'neu can, mo CMD khac va chay: ollama serve'\n        ) from exc\n    names = [m.get('name', '') for m in info.get('models', [])]\n    if model_name not in names:\n        raise RuntimeError(\n            f'Chua co model {model_name}. Mo CMD va chay: ollama pull {model_name}'\n        )"
+  },
+  "save_history": {
+    "file": "app.py",
+    "code": "def save_history(question: str, result: dict, elapsed: float) -> None:\n    \"\"\"Input: cau hoi, cau tra loi, thoi gian. Output: them 1 dong JSONL vao ket_qua.\"\"\"\n    RESULTS_DIR.mkdir(exist_ok=True, parents=True)\n    record = {\n        'timestamp': datetime.now().isoformat(timespec='seconds'),\n        'question': question,\n        'answer': result['answer'],\n        'sources': result['sources'],\n        'elapsed_seconds': round(elapsed, 2),\n    }\n    with (RESULTS_DIR / 'lich_su_hoi_dap.jsonl').open('a', encoding='utf-8') as stream:\n        stream.write(json.dumps(record, ensure_ascii=False) + '\\n')"
+  },
+  "main": {
+    "file": "app.py",
+    "code": "def main() -> int:\n    \"\"\"Input: ban phim. Output: in cau tra loi + nguon; 0 neu thoat binh thuong.\"\"\"\n    print('=' * 67)\n    print('         DEMO HOI DAP PDF - LANGCHAIN + RAG + OLLAMA')\n    print('=' * 67)\n    pdfs = list_pdfs(PDF_DIR)\n    if not pdfs:\n        print(f'[LOI] Hay copy it nhat 1 file .pdf vao: {PDF_DIR}')\n        return 1\n    print('PDF tim thay: ' + ', '.join(p.name for p in pdfs))\n    try:\n        check_ollama()\n        store, created, pages, chunks = prepare_store()\n        print(f'[OK] FAISS: {\"vua tao moi\" if created else \"da tai lai\"}.')\n        print('Nhap cau hoi bang tieng Viet; nhap exit de thoat.')\n        while True:\n            try:\n                question = input('\\nBAN HOI > ').strip()\n            except (EOFError, KeyboardInterrupt):\n                print('\\nKet thuc demo.')\n                return 0\n            if question.lower() in ('exit', 'quit', 'q', 'thoat'):\n                print('Da thoat.')\n                return 0\n            if not question:\n                print('Hay nhap mot cau hoi.')\n                continue\n            t0 = time.perf_counter()\n            try:\n                result = answer_question(store, question, LLM_MODEL, TOP_K)\n            except Exception as exc:\n                print(f'[LOI] Khong the tao cau tra loi: {exc}')\n                print('Kiem tra Ollama dang chay va may du RAM.')\n                continue\n            elapsed = time.perf_counter() - t0\n            print('\\nTRA LOI:\\n' + result['answer'])\n            print('\\nCAC DOAN DA TRUY XUAT (can kiem chung voi PDF):')\n            for source in result['sources']:\n                print(f\" - {source['file']} | trang {source['page']} | chunk {source['chunk_id']}\")\n            print(f'Thoi gian: {elapsed:.2f} giay')\n            save_history(question, result, elapsed)\n    except (FileNotFoundError, ValueError, RuntimeError) as exc:\n        print(f'\\n[LOI] {exc}')\n        return 1\n    except Exception as exc:\n        print(f'\\n[LOI KHONG MONG DOI] {type(exc).__name__}: {exc}')\n        return 1"
+  }
+}

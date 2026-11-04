@@ -1,0 +1,35 @@
+HUONG DAN KIEM TRA DEMO RAG — EMERGING TECHNOLOGIES (LAN 1)
+============================================================
+A. MOI TRUONG
+- Neu da cai xong: chay 04_KIEM_TRA_MOI_TRUONG.bat
+- Mo Ollama, dam bao co qwen2.5:3b (ollama list)
+- Chay 02_CHAY_HOI_DAP.bat tu thu muc project
+- Dung PDF mau: data/pdfs/TAI_LIEU_DEMO_CAU_LAC_BO_SACH.pdf
+
+B. BO CAU HOI CAN THU (KET QUA DU KIEN TU CHINH PDF MAU)
+1) Cau lac bo Sach Sao Mai duoc thanh lap nam nao?
+   -> 2024. Bang chung: PDF trang 1.
+2) Cau lac bo sinh hoat vao thu may va luc may gio?
+   -> Thu Bay, tu 08:00 den 10:00. Bang chung: PDF trang 1.
+3) Moi thanh vien duoc muon toi da bao nhieu cuon sach?
+   -> 2 cuon. Bang chung: PDF trang 2.
+4) Thoi han muon sach la bao nhieu ngay?
+   -> 14 ngay. Bang chung: PDF trang 2.
+5) Tong thong My la ai?
+   -> Khong co trong PDF, nen he thong can tu choi thay vi su dung kien thuc ngoai.
+6) LangChain la gi?
+   -> PDF mau KHONG co dinh nghia LangChain; thong tin o header KHONG du de tra loi.
+
+C. CAN KIEM CHUNG
+- Doi chieu tung cau tra loi voi dung trang PDF, khong chi tin vao danh sach source.
+- Prompt chi co the KHUYEN KHICH model tu choi; khong bao dam 100% chong hallucination.
+- Ket qua, thoi gian, nguon phu thuoc may, PDF, phien ban va moi truong cua ban.
+- Sau khi chay 05_CHAY_NOTEBOOK_VA_LUU_KET_QUA.bat, kiem tra:
+  notebooks/DEMO_TUNG_HAM_DA_CHAY.ipynb
+  ket_qua/ket_qua_5_cau_hinh.csv
+  ket_qua/pytest_ket_qua.txt
+- Chay 06_KIEM_TRA_HO_SO_LAN1.bat de ra bao cao ho so.
+
+D. DIEM DA SUA
+- Sap lai hai cell Notebook kiem tra du lieu mau SAU cell load_pdfs().
+- Khong thay doi logic RAG hay model dang dung. Can chay demo tren Windows truoc khi nop.

@@ -1,0 +1,9 @@
+﻿id,question_en,expected_evidence_or_answer_en,reference_page,case_type
+Q1,When was the Sao Mai book club founded?,2024,1,positive
+Q2,When and where does the club meet?,"Saturday, 08:00-10:00, room B203",1,positive
+Q3,How many books may a member borrow?,2 books,2,positive
+Q4,How long is the borrowing period?,14 days,2,positive
+Q5,Can the borrowing period be extended?,Once for 7 days if not reserved,2,positive
+Q6,What is the late-return fee?,"5,000 VND/day/book, max 50,000 VND/book",2,positive
+Q7,Who is the university president?,NOT STATED IN SAMPLE PDF,3,negative
+Q8,What is LangChain?,NOT DEFINED IN SAMPLE PDF,0,negative

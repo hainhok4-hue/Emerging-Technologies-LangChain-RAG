@@ -1,0 +1,29 @@
+RA SOAT SOURCE CODE DEMO — EMERGING TECHNOLOGIES (LAN 1)
+=====================================================
+Ket luan: Kien truc phu hop de tai LLM Applications with LangChain / PDF QA using RAG.
+
+DA KIEM TRA OFFLINE:
+- app.py, config.py va cac module trong src/ dung cu phap Python.
+- Source phan biet load PDF, chunks, embedding, FAISS, retrieval, prompt, ChatOllama/LCEL.
+- PDF mau co 3 trang va co the trich xuat van ban.
+- Notebook co 5 cau hinh A-E. Luu do, slides, question materials da co.
+
+DA SUA:
+- Notebook ban truoc tham chieu bien pages truoc khi gan; da chuyen phan reference_facts
+  sau cell load_pdfs, khong doi thuat toan hay tham so.
+- Da bo sung data/DEMO_QUICK_TEST_GUIDE_VI.txt voi cau hoi co chung cu.
+
+CHUA XAC MINH / KHONG DUOC TU NHAN DA CHAY:
+- Chua cai LangChain, FAISS, Ollama hoac Qwen model tren may Windows trong phien kiem tra nay.
+- Chua co notebook outputs that, CSV A-E, pytest output that; phai chay tren may cua nhom.
+- Prompt khong dam bao model chi tra loi theo PDF: anh demo 'LangChain la gi?' khong co
+  chung cu dinh nghia trong PDF mau; do la mot han che can neu trung thuc.
+
+KHUYEN NGHI:
+1. Demo 2-3 cau co chung cu PDF (nam 2024, thu Bay 08-10, 14 ngay) va 1 cau ngoai PDF.
+2. Chay 05_CHAY_NOTEBOOK_VA_LUU_KET_QUA.bat tren may da cai Ollama va Python dependencies.
+3. Doi chieu answers va source PDF, luu anh terminal va output that.
+4. Neu can nang muc do tin cay, them retrieval threshold + evidence verification va danh gia tren test set,
+   nhung can thu nghiem ky truoc khi thay doi code cho buoi thuyet trinh.
+
+- Sua checker: kiem tra thong bao 3 passed trong pytest output (khong chi file ton tai).

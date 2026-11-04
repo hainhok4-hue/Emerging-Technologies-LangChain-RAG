@@ -1,0 +1,15 @@
+CAU HOI THU VOI TAI LIEU PDF DEMO
+1. Cau lac bo Sach Sao Mai duoc thanh lap nam nao?
+   Goi y kiem chung: 2024.
+2. Cau lac bo hop vao thu may va luc may gio?
+   Goi y kiem chung: Thu Bay, 08:00-10:00.
+3. Dia diem sinh hoat cua cau lac bo o dau?
+   Goi y kiem chung: Phong B203.
+4. Moi thanh vien duoc muon toi da bao nhieu cuon va trong bao lau?
+   Goi y kiem chung: 2 cuon, 14 ngay.
+5. Co duoc gia han muon sach hay khong?
+   Goi y kiem chung: Co, mot lan 7 ngay neu khong ai dat truoc.
+6. Tre han tra sach bi xu ly nhu the nao?
+   Goi y kiem chung: Phi 5.000 dong/ngay/cuon, toi da 50.000 dong/cuon.
+7. Ai la hieu truong cua truong dai hoc?
+   Goi y kiem chung: PDF khong de cap, he thong nen bao thieu thong tin.

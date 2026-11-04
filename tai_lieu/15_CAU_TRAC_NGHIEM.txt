@@ -1,0 +1,34 @@
+15 CAU TRAC NGHIEM - LANGCHAIN PDF QA (1 DAP AN DUNG / CAU)
+
+1. RAG la viet tat cua gi?
+A. Retrieval-Augmented Generation  B. Random AI Graph  C. Rapid Audio Generation  D. Rich API Gateway
+2. Thanh phan doc PDF trong du an la?
+A. CSVLoader  B. PyPDFLoader  C. WebBaseLoader  D. PIL.Image
+3. Ham nao chia van ban thanh cac doan nho?
+A. RecursiveCharacterTextSplitter  B. ChatOllama  C. FAISS.load_local  D. urllib.request
+4. Embedding chuyen van ban thanh gi?
+A. Anh JPEG  B. HTML  C. Vector so  D. MP3
+5. FAISS duoc dung de lam gi?
+A. Render video  B. Tim kiem vector tuong tu  C. Gui email  D. Luu bang SQL quan he
+6. TOP_K = 4 co y nghia gi?
+A. 4 file PDF bat buoc  B. 4 model AI  C. Toi da 4 chunks duoc lay  D. 4 giay thoi gian cho
+7. CHUNK_OVERLAP la gi?
+A. So ky tu lap lai giua cac doan  B. So trang PDF  C. So model  D. So lan chay Ollama
+8. Nhan lenh 'exit' trong app.py se lam gi?
+A. Xoa file PDF  B. Thoat vong lap hoi dap  C. Cai dat lai Python  D. Xoa Ollama
+9. Model sinh cau tra loi trong du an la?
+A. Whisper  B. Qwen2.5:3b  C. CLIP  D. ResNet
+10. Trong project, nguon va trang PDF duoc luu trong dau?
+A. Document.metadata  B. HTML title  C. CPU register  D. URL browser
+11. Cau hoi ve thong tin khong co trong PDF nen duoc xu ly the nao?
+A. Tu do doan bua  B. Doi PDF qua MP3  C. Bao khong co du thong tin  D. Chi tra loi tieng Anh
+12. Doc PDF scan khong co lop chu voi PyPDFLoader thuong can gi them?
+A. OCR  B. Ethernet  C. GPS  D. HDMI
+13. Tai sao can dung cung embedding model cho index va cau hoi?
+A. De cac vector o cung khong gian bieu dien  B. De tang do phan giai PDF  C. De dao nguoc RAM  D. De luu video
+14. Ket qua RAG co can kiem chung voi PDF khong?
+A. Khong bao gio  B. Co, vi LLM van co the sai  C. Chi khi co 100 trang  D. Chi khi offline
+15. Tai sao chi nen tai index FAISS tin cay do minh tao?
+A. Vi file rat dep  B. Vi pickle co rui ro bao mat  C. Vi no la Excel  D. Vi can Bluetooth
+
+DAP AN: 1-A; 2-B; 3-A; 4-C; 5-B; 6-C; 7-A; 8-B; 9-B; 10-A; 11-C; 12-A; 13-A; 14-B; 15-B.
